@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:zvv_next/services/http_service.dart';
+import 'package:zvv_next/services/zvv_service.dart';
 
 import 'home_page.dart';
+
+var httpService = HttpService();
+var zvvService = ZvvService(httpService: httpService);
 
 class App extends StatelessWidget {
   @override
@@ -23,7 +28,7 @@ class App extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      home: HomePage(zvvService: zvvService),
     );
   }
 }
