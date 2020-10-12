@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _rehydrateStations();
     context.read<AppState>().addListener(_rehydrateStations);
   }
 
