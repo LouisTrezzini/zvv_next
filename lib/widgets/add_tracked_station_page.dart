@@ -75,7 +75,7 @@ class _AddTrackedStationPageState extends State<AddTrackedStationPage> {
   }
 
   Future<void> _submit() async {
-    context.read<AppState>().add(_selectedStation);
+    await context.read<AppState>().add(_selectedStation);
     Navigator.of(context).pop();
   }
 }

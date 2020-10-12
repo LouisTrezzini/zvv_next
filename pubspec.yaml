@@ -33,6 +33,7 @@ dependencies:
   jiffy: 3.0.1
   flutter_typeahead: 1.8.8
   provider: ^4.0.0
+  shared_preferences: '>=0.5.12 <2.0.0'
 
 dev_dependencies:
   flutter_test:
