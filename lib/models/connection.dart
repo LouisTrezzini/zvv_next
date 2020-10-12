@@ -22,6 +22,11 @@ class Connection {
         time = json["mainLocation"]["time"];
 
   Jiffy get expectedArrival {
-    return Jiffy("${this.date} ${this.time}", "d.M.yy H:m")..add(years: 2000);
+    return Jiffy("$date $time", "d.M.yy H:m")..add(years: 2000);
+  }
+
+  @override
+  String toString() {
+    return "Connection(line=$line, time=$time";
   }
 }

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:zvv_next/models/connection.dart';
-import 'package:zvv_next/models/station_info.dart';
+import 'package:zvv_next/models/station.dart';
 
 class StationCard extends StatelessWidget {
-  final StationInfo station;
+  final Station station;
   final List<Connection> connections;
+  final Function onRemove;
 
-  StationCard(this.station, {this.connections});
-
-  // Fields in a Widget subclass are always marked "final".
+  StationCard(this.station, {this.connections = const [], this.onRemove});
 
   @override
   Widget build(BuildContext context) {
-    print(connections[0].expectedArrival);
     return Card(
       key: Key(station.id),
       child: Column(
@@ -20,6 +18,10 @@ class StationCard extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.tram),
             title: Text(station.name),
+            trailing: onRemove != null
+                ? IconButton(
+                    icon: Icon(Icons.delete), onPressed: onRemove)
+                : null,
           ),
           ...connections.map((c) {
             return ListTile(
@@ -31,27 +33,10 @@ class StationCard extends StatelessWidget {
                 foregroundColor: _colorFromHex(c.lineForegroundColor),
               ),
               title: Text(
-                  "${c.directionType} ${c.direction} at ${c.time} (${c.expectedArrival.fromNow()})"),
+                "${c.directionType} ${c.direction} at ${c.time} (${c.expectedArrival.fromNow()})",
+              ),
             );
           }).toList(),
-          // Row(
-          //   children: [
-          //     TextButton(
-          //       child: const Text('BUY TICKETS'),
-          //       onPressed: () {
-          //         /* ... */
-          //       },
-          //     ),
-          //     const SizedBox(width: 8),
-          //     TextButton(
-          //       child: const Text('LISTEN'),
-          //       onPressed: () {
-          //         /* ... */
-          //       },
-          //     ),
-          //     const SizedBox(width: 8),
-          //   ],
-          // ),
         ],
       ),
     );

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:zvv_next/services/http_service.dart';
-import 'package:zvv_next/services/zvv_service.dart';
 
+import '../constants.dart';
+import 'add_tracked_station_page.dart';
 import 'home_page.dart';
-
-var httpService = HttpService();
-var zvvService = ZvvService(httpService: httpService);
 
 class App extends StatelessWidget {
   @override
@@ -28,7 +25,10 @@ class App extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(zvvService: zvvService),
+      home: HomePage(),
+      routes: {
+        ADD_TRACKED_STATION_ROUTE: (context) => AddTrackedStationPage(),
+      },
     );
   }
 }

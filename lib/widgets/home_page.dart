@@ -1,41 +1,68 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:zvv_next/models/connection.dart';
-import 'package:zvv_next/models/station_info.dart';
+import 'package:zvv_next/models/station.dart';
 import 'package:zvv_next/services/zvv_service.dart';
 
+import '../app_state.dart';
+import '../constants.dart';
 import 'station_card.dart';
 
-var XXX = StationInfo(
-    "A=1@O=Zürich, Salersteig@X=8548481@Y=47406071@U=85@L=008591332@B=1@p=1601975100@",
-    "Zürich, Salersteig");
+class HydratedStation {
+  final Station station;
+  final List<Connection> connections;
+
+  HydratedStation(this.station, this.connections);
+}
 
 class HomePage extends StatefulWidget {
-  final ZvvService zvvService;
-
-  HomePage({this.zvvService});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<StationInfo> _stations = [];
-  final Map<StationInfo, List<Connection>> _connections = {};
+  bool _isEditMode = false;
+  List<HydratedStation> _hydratedStations = [];
 
+  @override
+  void initState() {
+    super.initState();
+    context.read<AppState>().addListener(_rehydrateStations);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('ZVV Next'),
+        actions: [
+          IconButton(
+            icon: Icon(_isEditMode ? Icons.edit_off : Icons.edit),
+            onPressed: () {
+              setState(() {
+                _isEditMode = !_isEditMode;
+              });
+            },
+          )
+        ],
       ),
-      body: ListView.builder(
+      body: RefreshIndicator(
+        onRefresh: _rehydrateStations,
+        child: ListView.builder(
           padding: EdgeInsets.all(8),
-          itemCount: _stations.length,
+          itemCount: _hydratedStations.length,
           itemBuilder: (context, index) {
-            var station = _stations[index];
-            return StationCard(station, connections: _connections[station]);
-          }),
+            var pair = _hydratedStations[index];
+            return StationCard(
+              pair.station,
+              connections: pair.connections,
+              onRemove: _isEditMode ? () => _removeStation(pair.station) : null,
+            );
+          },
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addStation,
         tooltip: 'Add tracked station',
@@ -44,17 +71,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _addStation() async {
-    // log("clicked");
-    // setState(() {
-    //   _stations.add(StationInfo((_stations.length + 1).toString(), "Salersteig ${_stations.length + 1}"));
-    // });
-    var x = await this.widget.zvvService.getStationTimetable(XXX);
-    print(x);
+  Future<void> _addStation() async {
+    Navigator.of(context).pushNamed(ADD_TRACKED_STATION_ROUTE);
+  }
+
+  void _removeStation(Station station) {
+    context.read<AppState>().remove(station);
+  }
+
+  Future<void> _rehydrateStations() async {
+    log("Refreshing connections");
+    ZvvService zvvService = context.read<ZvvService>();
+    List<HydratedStation> hydratedStations = await Future.wait(
+        context.read<AppState>().trackedStations.map((station) async {
+      var connections = await zvvService.getStationTimetable(station);
+      return HydratedStation(station, connections);
+    }));
     setState(() {
-      _stations.clear();
-      _stations.add(XXX);
-      _connections[XXX] = x;
+      _hydratedStations = hydratedStations;
     });
   }
 }
